@@ -11,6 +11,7 @@ const Twitter = require("twitter");
 const client = new Twitter(keys.twitter);
 const Spotify = require("node-spotify-api");
 const spotify = new Spotify(keys.spotify);
+const request = require("request");
 
 /* Retrieve input from user */
 var cmdArgs = process.argv;
@@ -56,7 +57,7 @@ function myTweets() {
             return console.log("Error occurred:", error);
         }
         else if (!error && response.statusCode == 200) {
-            console.log("\n==============LAST " + params.count + " TWEETS==============\n");
+            console.log("\n==================LAST " + params.count + " TWEETS==================\n");
             tweets.forEach(element => {
                 console.log("------------------------------------------");
                 console.log("Twitter SN:", element.user.screen_name);
@@ -64,7 +65,7 @@ function myTweets() {
                 console.log("Created:", element.created_at);
                 console.log("------------------------------------------");
             });
-            console.log("\n==========================================\n");
+            console.log("\n==================================================\n");
         }
     });
 }
@@ -89,7 +90,7 @@ function searchSong(songToSearch) {
             console.log("Album:", element.album.name);
             console.log("------------------------------------------");
         });
-        console.log("\n==================================================\N");
+        console.log("\n==================================================\n");
     });
 }
 
@@ -102,7 +103,26 @@ function buildSpotifyArtistList(artistArray) {
 }
 
 function searchMovie(movieToSearch) {
+    let queryUrl = encodeURI("http://www.omdbapi.com/?t=" + movieToSearch + "&plot=short&apikey=" + keys.omdb.apikey);
+    console.log(queryUrl);
 
+    request(queryUrl, function (error, response, body) {
+        if(error){
+            return console.log("Error occurred:", error);
+        }
+        else if (!error && response.statusCode === 200) {
+            console.log("\n===================MOVIES FOUND===================\n");
+            console.log("Title:", JSON.parse(body).Title);
+            console.log("Year:", JSON.parse(body).Year);
+            console.log("Rating:", JSON.parse(body).imdbRating);
+            console.log("Rotten Tomatoes Rating:", JSON.parse(body).Ratings.find(x => x.Source == "Rotten Tomatoes").Value);
+            console.log("Country Produced:", JSON.parse(body).Country);
+            console.log("Language:", JSON.parse(body).Language);
+            console.log("Plot:", JSON.parse(body).Plot);
+            console.log("Actors:", JSON.parse(body).Actors);
+            console.log("\n==================================================\n");
+        }
+    });
 }
 
 function doWhatItSays() {
