@@ -1,0 +1,110 @@
+/* jshint esversion: 6 */
+
+/* Set environment variables */
+require("dotenv").config();
+
+/* Load keys */
+var keys = require("./keys");
+
+/* Load libraries */
+const Twitter = require("twitter");
+const client = new Twitter(keys.twitter);
+const Spotify = require("node-spotify-api");
+const spotify = new Spotify(keys.spotify);
+
+/* Retrieve input from user */
+var cmdArgs = process.argv;
+
+var liriCommand = cmdArgs[2];
+var liriParameter = buildLiriParameter();
+
+switch (liriCommand) {
+    case "my-tweets":
+        myTweets();
+        break;
+    case "spotify-this-song":
+        searchSong(liriParameter);
+        break;
+    case "movie-this":
+        searchMovie(liriParameter);
+        break;
+    case "do-what-it-says":
+        doWhatItSays();
+        break;
+    default:
+        console.log("\nInvalid command!\nPlease enter one of the following commands:\n'my-tweets' (Twitter)\n'spotify-this-song' (Spotify)\n'movie-this' (OMDB Movies)\n'do-what-it-says' (Do What It Says)\n");
+        break;
+}
+
+/* Liri functions */
+function buildLiriParameter() {
+    let result = "";
+    for (let i = 3; i < cmdArgs.length; i++) {
+        result += cmdArgs[i] + " ";
+    }
+    return result.trim();
+}
+
+function myTweets() {
+    let params = {
+        screen_name: "nikitas2191",
+        count: 20
+    };
+
+    client.get("statuses/user_timeline", params, function (error, tweets, response) {
+        if (error) {
+            return console.log("Error occurred:", error);
+        }
+        else if (!error && response.statusCode == 200) {
+            console.log("\n==============LAST " + params.count + " TWEETS==============\n");
+            tweets.forEach(element => {
+                console.log("------------------------------------------");
+                console.log("Twitter SN:", element.user.screen_name);
+                console.log("Tweet:", element.text);
+                console.log("Created:", element.created_at);
+                console.log("------------------------------------------");
+            });
+            console.log("\n==========================================\n");
+        }
+    });
+}
+
+function searchSong(songToSearch) {
+    let params = {
+        type: "track",
+        query: songToSearch
+    };
+
+    spotify.search(params, function (error, data) {
+        if (error)
+            return console.log("Error occurred:", error);
+
+        console.log("\n==============SPOTIFY SEARCH RESULTS==============\n");
+        console.log("Songs found " + data.tracks.total + "\n\n");
+        data.tracks.items.forEach(element => {
+            console.log("------------------------------------------");
+            console.log("Artist(s):", buildSpotifyArtistList(element.artists));
+            console.log("Song:", element.name);
+            console.log("Preview:", element.preview_url);
+            console.log("Album:", element.album.name);
+            console.log("------------------------------------------");
+        });
+        console.log("\n==================================================\N");
+    });
+}
+
+function buildSpotifyArtistList(artistArray) {
+    let result = "";
+    for (let i = 0; i < artistArray.length; i++) {
+        result += artistArray[i].name + ", ";
+    }
+    return result.slice(0, -2);
+}
+
+function searchMovie(movieToSearch) {
+
+}
+
+function doWhatItSays() {
+
+}
