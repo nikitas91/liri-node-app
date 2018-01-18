@@ -16,6 +16,7 @@ const fs = require("fs");
 
 /* Variables */
 const randomLiriFile = "./random.txt";
+const twitterUsername = "nikitas2191";
 
 /* Retrieve input from user */
 var cmdArgs = process.argv;
@@ -56,7 +57,7 @@ function buildLiriParameter() {
 
 function myTweets() {
     let params = {
-        screen_name: "nikitas2191",
+        screen_name: twitterUsername,
         count: 20
     };
 
@@ -79,33 +80,33 @@ function myTweets() {
 }
 
 function searchSong(songToSearch) {
-    if (songToSearch) {
-        let params = {
-            type: "track",
-            query: songToSearch
-        };
+    if (!songToSearch)
+        songToSearch = "The Sign Ace of Base";
 
-        spotify.search(params, function (error, data) {
-            if (error) {
-                return console.log("Error occurred:", error);
-            }
+    let params = {
+        type: "track",
+        query: songToSearch,
+        limit: 5
+    };
 
-            console.log("\n==============SPOTIFY SEARCH RESULTS==============\n");
-            console.log("Songs found " + data.tracks.total + "\n\n");
-            data.tracks.items.forEach(element => {
-                console.log("------------------------------------------");
-                console.log("Artist(s):", buildSpotifyArtistList(element.artists));
-                console.log("Song:", element.name);
-                console.log("Preview:", element.preview_url);
-                console.log("Album:", element.album.name);
-                console.log("------------------------------------------");
-            });
-            console.log("\n==================================================\n");
+    spotify.search(params, function (error, data) {
+        if (error) {
+            return console.log("Error occurred:", error);
+        }
+
+        console.log("\n==============SPOTIFY SEARCH RESULTS==============\n");
+        console.log("Songs found " + data.tracks.total);
+        console.log("Showing top 5 results\n\n");
+        data.tracks.items.forEach(element => {
+            console.log("------------------------------------------");
+            console.log("Artist(s):", buildSpotifyArtistList(element.artists));
+            console.log("Song:", element.name);
+            console.log("Preview:", element.preview_url);
+            console.log("Album:", element.album.name);
+            console.log("------------------------------------------");
         });
-    }
-    else {
-        console.log("Please provide a valid song to search!");
-    }
+        console.log("\n==================================================\n");
+    });
 }
 
 function buildSpotifyArtistList(artistArray) {
@@ -117,36 +118,34 @@ function buildSpotifyArtistList(artistArray) {
 }
 
 function searchMovie(movieToSearch) {
-    if (movieToSearch) {
-        let queryUrl = encodeURI("http://www.omdbapi.com/?t=" + movieToSearch + "&plot=short&apikey=" + keys.omdb.apikey);
-        console.log(queryUrl);
+    if (!movieToSearch)
+        movieToSearch = "Mr. Nobody";
 
-        request(queryUrl, function (error, response, body) {
-            if (error)
-                return console.log("Error occurred:", error);
+    let queryUrl = encodeURI("http://www.omdbapi.com/?t=" + movieToSearch + "&plot=short&apikey=" + keys.omdb.apikey);
+    console.log(queryUrl);
 
-            if (!error && response.statusCode === 200) {
-                if (JSON.parse(body).Response == "True") {
-                    console.log("\n===================MOVIES FOUND===================\n");
-                    console.log("Title:", JSON.parse(body).Title);
-                    console.log("Year:", JSON.parse(body).Year);
-                    console.log("Rating:", JSON.parse(body).imdbRating);
-                    console.log("Rotten Tomatoes Rating:", JSON.parse(body).Ratings.find(x => x.Source == "Rotten Tomatoes").Value);
-                    console.log("Country Produced:", JSON.parse(body).Country);
-                    console.log("Language:", JSON.parse(body).Language);
-                    console.log("Plot:", JSON.parse(body).Plot);
-                    console.log("Actors:", JSON.parse(body).Actors);
-                    console.log("\n==================================================\n");
-                }
-                else {
-                    console.log("Movie not found!");
-                }
+    request(queryUrl, function (error, response, body) {
+        if (error)
+            return console.log("Error occurred:", error);
+
+        if (!error && response.statusCode === 200) {
+            if (JSON.parse(body).Response == "True") {
+                console.log("\n===================MOVIES FOUND===================\n");
+                console.log("Title:", JSON.parse(body).Title);
+                console.log("Year:", JSON.parse(body).Year);
+                console.log("Rating:", JSON.parse(body).imdbRating);
+                console.log("Rotten Tomatoes Rating:", JSON.parse(body).Ratings.find(x => x.Source == "Rotten Tomatoes").Value);
+                console.log("Country Produced:", JSON.parse(body).Country);
+                console.log("Language:", JSON.parse(body).Language);
+                console.log("Plot:", JSON.parse(body).Plot);
+                console.log("Actors:", JSON.parse(body).Actors);
+                console.log("\n==================================================\n");
             }
-        });
-    }
-    else {
-        console.log("Please provide a valid movie to search!");
-    }
+            else {
+                console.log("Movie not found!");
+            }
+        }
+    });
 }
 
 function doWhatItSays() {
