@@ -122,7 +122,6 @@ function searchMovie(movieToSearch) {
         movieToSearch = "Mr. Nobody";
 
     let queryUrl = encodeURI("http://www.omdbapi.com/?t=" + movieToSearch + "&plot=short&apikey=" + keys.omdb.apikey);
-    console.log(queryUrl);
 
     request(queryUrl, function (error, response, body) {
         if (error)
